@@ -1,13 +1,12 @@
+
 const PASSWORD="1234";
 const REPO="owner/repo";
 const FILE="data.json";
 
 let token=localStorage.getItem("gh_token")||"";
 
-let data={
- lists:{Main:{categories:["Общее"],items:[]}},
- current:"Main"
-};
+let data={lists:{Main:[]},current:"Main"};
+let editIndex=null;
 
 function login(){
  if(password.value===PASSWORD){
@@ -21,27 +20,47 @@ function toggleFilters(){filters.classList.toggle("hidden")}
 
 function addList(){
  if(!newList.value)return;
- data.lists[newList.value]={categories:["Общее"],items:[]};
+ data.lists[newList.value]=[];
  data.current=newList.value;
  render();
 }
 
 function switchList(){data.current=listSelect.value;render()}
 
-function addItem(){
- let list=data.lists[data.current];
- list.items.push({
+function saveItem(){
+ let item={
   title:title.value,
   price:price.value,
   image:image.value,
-  category:category.value,
   bought:false
- });
+ };
+
+ if(editIndex!==null){
+  data.lists[data.current][editIndex]=item;
+  editIndex=null;
+ }else{
+  data.lists[data.current].push(item);
+ }
+
+ title.value="";price.value="";image.value="";
+ render();
+}
+
+function editItem(i){
+ let item=data.lists[data.current][i];
+ title.value=item.title;
+ price.value=item.price;
+ image.value=item.image;
+ editIndex=i;
+}
+
+function deleteItem(i){
+ data.lists[data.current].splice(i,1);
  render();
 }
 
 function toggleBought(i){
- let item=data.lists[data.current].items[i];
+ let item=data.lists[data.current][i];
  item.bought=!item.bought;
  render();
 }
@@ -55,21 +74,13 @@ function render(){
   listSelect.appendChild(o);
  });
 
- let list=data.lists[data.current];
-
- category.innerHTML="";
- list.categories.forEach(c=>{
-  let o=document.createElement("option");
-  o.value=c;o.text=c;
-  category.appendChild(o);
- });
-
+ let items=data.lists[data.current];
  let s=search.value.toLowerCase();
- let div=items;
- div.innerHTML="";
+
+ itemsDiv.innerHTML="";
  let plan=0,bought=0;
 
- list.items.filter(i=>i.title.toLowerCase().includes(s)).forEach((i,idx)=>{
+ items.filter(i=>i.title.toLowerCase().includes(s)).forEach((i,idx)=>{
   if(i.bought)bought+=Number(i.price||0);
   else plan+=Number(i.price||0);
 
@@ -79,10 +90,11 @@ function render(){
    ${i.image?`<img src="${i.image}">`:""}
    <h3>${i.title}</h3>
    <p>${i.price}</p>
-   <small>${i.category}</small><br>
    <button onclick="toggleBought(${idx})">${i.bought?"Вернуть":"Куплено"}</button>
+   <button onclick="editItem(${idx})">Редактировать</button>
+   <button onclick="deleteItem(${idx})">Удалить</button>
   `;
-  div.appendChild(el);
+  itemsDiv.appendChild(el);
  });
 
  stats.innerText=`План: ${plan} | Куплено: ${bought} | Всего: ${plan+bought}`;

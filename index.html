@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Buylist Final</title>
+<title>Buylist Pro</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div id="auth" class="center">
-  <div class="card">
+  <div class="card glass">
     <h1>Buylist</h1>
     <input id="password" type="password" placeholder="Пароль">
     <button onclick="login()">Войти</button>
@@ -18,7 +18,7 @@
 
 <div id="app" class="hidden">
 
-<header>
+<header class="glass">
   <div class="left">
     <h1>Buylist</h1>
     <select id="listSelect" onchange="switchList()"></select>
@@ -31,21 +31,20 @@
   </div>
 </header>
 
-<div id="filters" class="panel hidden">
+<div id="filters" class="panel glass hidden">
   <input id="search" placeholder="Поиск..." oninput="render()">
 </div>
 
-<div id="stats"></div>
+<div id="stats" class="stats"></div>
 
 <div id="items" class="grid"></div>
 
-<div class="panel">
-  <h3>Добавить товар</h3>
+<div class="panel glass">
+  <h3>Добавить / редактировать</h3>
   <input id="title" placeholder="Название">
   <input id="price" type="number" placeholder="Цена">
   <input id="image" placeholder="Фото URL">
-  <select id="category"></select>
-  <button onclick="addItem()">Добавить</button>
+  <button onclick="saveItem()">Сохранить товар</button>
 </div>
 
 </div>
