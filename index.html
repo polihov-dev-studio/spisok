@@ -1,54 +1,205 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Buylist Pro</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Private Buylist</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+  <div class="bg-orb orb-1"></div>
+  <div class="bg-orb orb-2"></div>
 
-<div id="auth" class="center">
-  <div class="card glass">
-    <h1>Buylist</h1>
-    <input id="password" type="password" placeholder="Пароль">
-    <button onclick="login()">Войти</button>
+  <main id="authScreen" class="screen auth-screen">
+    <section class="auth-card glass">
+      <div class="auth-icon">🔒</div>
+      <div class="eyebrow">PRIVATE MARKETPLACE PLANNER</div>
+      <h1>Личный список покупок</h1>
+      <p class="muted">
+        Лёгкая защита для личного доступа. Данные сохраняются в браузере через localStorage.
+      </p>
+
+      <form id="loginForm" class="auth-form">
+        <label>
+          <span>Пароль</span>
+          <input id="passwordInput" type="password" placeholder="Введите пароль" autocomplete="current-password" />
+        </label>
+        <button class="primary-btn" type="submit">Войти</button>
+        <div id="authError" class="error-text"></div>
+        <div class="auth-hint">Текущий пароль в коде: <b>1234</b></div>
+      </form>
+    </section>
+  </main>
+
+  <main id="appScreen" class="screen hidden">
+    <div class="container">
+      <header class="hero glass">
+        <div>
+          <div class="eyebrow">PRIVATE BUYLIST</div>
+          <h1>Планировщик покупок</h1>
+          <p class="muted hero-text">
+            Категории, подкатегории, ручное добавление товаров, фильтры, избранное и суммы по разделам.
+          </p>
+        </div>
+        <div class="hero-actions">
+          <button id="openItemModalBtn" class="primary-btn">+ Добавить товар</button>
+          <button id="logoutBtn" class="secondary-btn">Выйти</button>
+        </div>
+      <button onclick="saveToGithub()">Сохранить</button></header>
+
+      <section class="stats-grid">
+        <article class="stat-card glass">
+          <div class="stat-label">Активные товары</div>
+          <div id="statActiveCount" class="stat-value">0</div>
+          <div class="stat-hint">Не купленные позиции</div>
+        </article>
+        <article class="stat-card glass">
+          <div class="stat-label">Сумма списка</div>
+          <div id="statActiveSum" class="stat-value">0 ₽</div>
+          <div class="stat-hint">По всем активным товарам</div>
+        </article>
+        <article class="stat-card glass">
+          <div class="stat-label">Уже куплено</div>
+          <div id="statBoughtSum" class="stat-value">0 ₽</div>
+          <div class="stat-hint">Сумма купленных товаров</div>
+        </article>
+        <article class="stat-card glass">
+          <div class="stat-label">Избранное</div>
+          <div id="statFavoriteCount" class="stat-value">0</div>
+          <div class="stat-hint">Быстрый доступ</div>
+        </article>
+      </section>
+
+      <section class="panel-grid">
+        <aside class="sidebar">
+          <div class="glass panel">
+            <div class="panel-title">Фильтры</div>
+            <div class="field-grid single">
+              <label>
+                <span>Поиск</span>
+                <input id="searchInput" type="text" placeholder="Название, заметка, маркетплейс" />
+              </label>
+              <label>
+                <span>Маркетплейс</span>
+                <select id="marketplaceFilter"></select>
+              </label>
+              <label>
+                <span>Статус</span>
+                <select id="statusFilter"></select>
+              </label>
+              <label>
+                <span>Категория</span>
+                <select id="categoryFilter"></select>
+              </label>
+            </div>
+            <div class="checks-row">
+              <label class="check-pill"><input id="favoriteOnly" type="checkbox" /> Только избранное</label>
+              <label class="check-pill"><input id="boughtOnly" type="checkbox" /> Только купленные</label>
+            </div>
+          </div>
+
+          <div class="glass panel">
+            <div class="panel-title">Категории</div>
+            <div class="field-grid single compact">
+              <label>
+                <span>Новая категория</span>
+                <input id="newCategoryName" type="text" placeholder="Например: Тормоза" />
+              </label>
+              <button id="addCategoryBtn" class="secondary-btn full">Добавить категорию</button>
+              <label>
+                <span>Категория для подкатегории</span>
+                <select id="subCategoryParentSelect"></select>
+              </label>
+              <label>
+                <span>Новая подкатегория</span>
+                <input id="newSubcategoryName" type="text" placeholder="Например: Передние тормоза" />
+              </label>
+              <button id="addSubcategoryBtn" class="secondary-btn full">Добавить подкатегорию</button>
+            </div>
+          </div>
+        </aside>
+
+        <section class="content glass panel">
+          <div class="panel-head">
+            <div>
+              <div class="panel-title">Товары</div>
+              <div id="resultsInfo" class="muted small"></div>
+            </div>
+          </div>
+          <div id="categorySections" class="category-sections"></div>
+          <div id="emptyState" class="empty-state hidden">
+            <div class="empty-icon">📦</div>
+            <h3>Ничего не найдено</h3>
+            <p class="muted">Измени фильтры или добавь новый товар.</p>
+          </div>
+        </section>
+      </section>
+    </div>
+  </main>
+
+  <div id="itemModal" class="modal hidden">
+    <div class="modal-backdrop" data-close-modal></div>
+    <div class="modal-card glass">
+      <div class="modal-head">
+        <h2 id="itemModalTitle">Новый товар</h2>
+        <button class="icon-btn" data-close-modal>✕</button>
+      </div>
+      <div class="field-grid">
+        <label class="span-2">
+          <span>Название</span>
+          <input id="itemTitle" type="text" placeholder="Название товара" />
+        </label>
+        <label>
+          <span>Маркетплейс</span>
+          <select id="itemMarketplace"></select>
+        </label>
+        <label>
+          <span>Статус</span>
+          <select id="itemStatus"></select>
+        </label>
+        <label class="span-2">
+          <span>Ссылка на товар</span>
+          <input id="itemUrl" type="text" placeholder="https://..." />
+        </label>
+        <label class="span-2">
+          <span>Ссылка на фото</span>
+          <input id="itemImage" type="text" placeholder="https://image..." />
+        </label>
+        <label>
+          <span>Цена</span>
+          <input id="itemPrice" type="number" min="0" step="1" placeholder="0" />
+        </label>
+        <label>
+          <span>Количество</span>
+          <input id="itemQty" type="number" min="1" step="1" value="1" />
+        </label>
+        <label>
+          <span>Категория</span>
+          <select id="itemCategory"></select>
+        </label>
+        <label>
+          <span>Подкатегория</span>
+          <select id="itemSubcategory"></select>
+        </label>
+        <label class="span-2">
+          <span>Заметка</span>
+          <textarea id="itemNote" rows="4" placeholder="Комментарий, артикул, что сравнить и т.д."></textarea>
+        </label>
+        <label class="check-row span-2">
+          <input id="itemFavorite" type="checkbox" />
+          <span>Добавить в избранное</span>
+        </label>
+      </div>
+      <div class="modal-actions">
+        <button class="secondary-btn" data-close-modal>Отмена</button>
+        <button id="saveItemBtn" class="primary-btn">Сохранить</button>
+      </div>
+    </div>
   </div>
-</div>
 
-<div id="app" class="hidden">
-
-<header class="glass">
-  <div class="left">
-    <h1>Buylist</h1>
-    <select id="listSelect" onchange="switchList()"></select>
-    <input id="newList" placeholder="Новый список">
-    <button onclick="addList()">+</button>
-  </div>
-  <div class="right">
-    <button onclick="toggleFilters()">Фильтры</button>
-    <button onclick="save()">Сохранить</button>
-  </div>
-</header>
-
-<div id="filters" class="panel glass hidden">
-  <input id="search" placeholder="Поиск..." oninput="render()">
-</div>
-
-<div id="stats" class="stats"></div>
-
-<div id="items" class="grid"></div>
-
-<div class="panel glass">
-  <h3>Добавить / редактировать</h3>
-  <input id="title" placeholder="Название">
-  <input id="price" type="number" placeholder="Цена">
-  <input id="image" placeholder="Фото URL">
-  <button onclick="saveItem()">Сохранить товар</button>
-</div>
-
-</div>
-
-<script src="app.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
